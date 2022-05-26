@@ -26,9 +26,19 @@ lint: .bin/golangci-lint
 mocks: .bin/mockery
 	@go generate .
 
-.PHONY: test
-test: .bin/gotestsum
+.PHONY: test.unit
+test.unit: .bin/gotestsum
+	@.bin/gotestsum --format testname -- -cover -coverprofile coverage.txt -short
+
+.PHONY: test.integration
+test.integration: .bin/gotestsum
 	@.bin/gotestsum --format testname --junitfile results.xml -- -cover -coverprofile coverage.txt
+
+.PHONY: test
+test:
+	@docker compose up --force-recreate --exit-code-from int-test --build int-test
+	@docker cp int-test:/test/coverage.txt .
+	@docker cp int-test:/test/results.xml .
 
 ################################################################################
 # Tools

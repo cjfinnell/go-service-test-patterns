@@ -30,6 +30,19 @@ services:
       retries: 30
       start_period: 3s
 
+  int-test:
+    build:
+      context: .
+      target: tester
+    container_name: int-test
+    networks:
+      - testnet
+    environment:
+      REDIS_URL: redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
 networks:
   testnet:
     name: testnet
