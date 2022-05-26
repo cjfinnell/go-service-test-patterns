@@ -40,6 +40,12 @@ test:
 	@docker cp int-test:/test/coverage.txt .
 	@docker cp int-test:/test/results.xml .
 
+.PHONY: fuzz
+fuzz:
+	@docker compose up --force-recreate -d redis
+	-go test -fuzz FuzzIntegration 
+	@docker compose down
+
 ################################################################################
 # Tools
 ################################################################################
