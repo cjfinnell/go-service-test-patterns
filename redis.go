@@ -11,6 +11,7 @@ import (
 
 var ErrNotFound = errors.New("key not found")
 
+//go:generate .bin/mockery --name RedisWrapper
 type RedisWrapper interface {
 	Get(key string) (string, error)
 	Set(key, value string) error
