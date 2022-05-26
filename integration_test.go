@@ -4,6 +4,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -19,8 +20,16 @@ func FuzzIntegration(f *testing.F) {
 	srv := newServer(conf)
 
 	f.Add("key", "value")
+	f.Add("e4e810c8c1ebc58a29df86222e68", "a57cfc8cad97fc576e01dfb3924e80102199")
 
 	f.Fuzz(func(t *testing.T, fuzzKey, fuzzValue string) {
+		if strings.TrimSpace(fuzzKey) == "" || strings.TrimSpace(fuzzValue) == "" {
+			t.Skip()
+		}
+		if url.PathEscape(fuzzKey+fuzzValue) != fuzzKey+fuzzValue {
+			t.Skip()
+		}
+
 		routeKey := "/v1/" + fuzzKey
 		routeKeyValue := routeKey + "/" + fuzzValue
 
