@@ -1,0 +1,35 @@
+services:
+
+  redis:
+    image: redis:7
+    networks:
+      - testnet
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  app:
+    build:
+      context: .
+      target: release
+    ports:
+      - "8080:8080"
+    networks:
+      - testnet
+    environment:
+      REDIS_URL: redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "curl", "-f", "http://localhost:8080/status" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+
+networks:
+  testnet:
+    name: testnet
