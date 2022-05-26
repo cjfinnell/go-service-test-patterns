@@ -16,14 +16,35 @@ jobs:
       - run: make lint
   test:
     executor: go
+    parameters:
+      upload:
+        type: boolean
+        default: true
+      alpine-version:
+        type: string
+        default: "3.16"
+      go-version:
+        type: string
+        default: "1.18"
+      redis-version:
+        type: string
+        default: "7"
     steps:
       - checkout
       - setup_remote_docker:
           version: 20.10.14
-      - run: make test
-      - codecov/upload
-      - store_test_results:
-          path: results.xml
+      - run:
+          command: make test
+          environment:
+            ALPINE_VERSION: << parameters.alpine-version >>
+            GO_VERSION: << parameters.go-version >>
+            REDIS_VERSION: << parameters.redis-version >>
+      - when:
+          condition: << parameters.upload >>
+          steps:
+            - codecov/upload
+            - store_test_results:
+                path: results.xml
   load:
     executor: go
     steps:
@@ -43,3 +64,12 @@ workflows:
           requires:
             - lint
             - test
+  regression:
+    jobs:
+      - test:
+          upload: false
+          matrix:
+            parameters:
+              alpine-version: ["3.15", "3.14", "3.13"]
+              go-version: ["1.18", "1.17"]  # expect failure for 1.17 because of fuzzing
+              redis-version: ["6", "5", "4"]

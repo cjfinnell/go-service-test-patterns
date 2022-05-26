@@ -1,4 +1,11 @@
 ################################################################################
+# Variables
+################################################################################
+
+ALPINE_VERSION ?= 3.16
+GO_VERSION     ?= 1.18
+
+################################################################################
 # Commands
 ################################################################################
 
@@ -36,7 +43,8 @@ test.integration: .bin/gotestsum
 
 .PHONY: test
 test:
-	@docker compose up --force-recreate --exit-code-from int-test --build int-test
+	@docker compose build --build-arg GO_VERSION=$(GO_VERSION) int-test
+	@docker compose up --force-recreate --exit-code-from int-test int-test
 	@docker cp int-test:/test/coverage.txt .
 	@docker cp int-test:/test/results.xml .
 
@@ -48,8 +56,10 @@ fuzz:
 
 .PHONY: load
 load:
-	@docker compose up --force-recreate --build -d app
+	@docker compose build --build-arg ALPINE_VERSION=$(ALPINE_VERSION) app
+	@docker compose up --force-recreate -d app
 	@cat load.js | docker run --rm --network testnet -i loadimpact/k6 run -
+	@docker compose down
 
 ################################################################################
 # Tools

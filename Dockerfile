@@ -1,14 +1,17 @@
-FROM golang:1.18-alpine3.16 as builder
+ARG GO_VERSION=1.18
+ARG ALPINE_VERSION=3.16
+
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} as builder
 WORKDIR /build
 ADD . .
 RUN go build -o app
 
-FROM golang:1.18 as tester
+FROM golang:${GO_VERSION} as tester
 WORKDIR /test
 ADD . .
 CMD make test.integration
 
-FROM alpine:3.16 as release
+FROM alpine:${ALPINE_VERSION} as release
 WORKDIR /app
 COPY --from=builder /build/app .
 RUN adduser -S -D -H -h /app appuser
