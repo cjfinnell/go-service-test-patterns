@@ -46,6 +46,11 @@ fuzz:
 	-go test -fuzz FuzzIntegration 
 	@docker compose down
 
+.PHONY: load
+load:
+	@docker compose up --force-recreate --build -d app
+	@cat load.js | docker run --rm --network testnet -i loadimpact/k6 run -
+
 ################################################################################
 # Tools
 ################################################################################

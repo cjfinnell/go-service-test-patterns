@@ -39,3 +39,7 @@ workflows:
     jobs:
       - lint
       - test
+      - load:
+          requires:
+            - lint
+            - test
