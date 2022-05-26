@@ -6,7 +6,7 @@
 clean:
 	-@docker compose down --remove-orphans -t 0
 	-@docker compose rm -f 
-	-@rm -rf .bin/
+	-@rm -rf .bin/ coverage.txt results.xml
 	-@go clean -testcache
 
 .PHONY: deps
@@ -28,7 +28,7 @@ mocks: .bin/mockery
 
 .PHONY: test
 test: .bin/gotestsum
-	@.bin/gotestsum --format testname
+	@.bin/gotestsum --format testname --junitfile results.xml -- -cover -coverprofile coverage.txt
 
 ################################################################################
 # Tools
