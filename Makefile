@@ -7,6 +7,7 @@ clean:
 	-@docker compose down --remove-orphans -t 0
 	-@docker compose rm -f 
 	-@rm -rf .bin/
+	-@go clean -testcache
 
 .PHONY: deps
 deps:
@@ -25,6 +26,10 @@ lint: .bin/golangci-lint
 mocks: .bin/mockery
 	@go generate .
 
+.PHONY: test
+test: .bin/gotestsum
+	@.bin/gotestsum --format testname
+
 ################################################################################
 # Tools
 ################################################################################
@@ -36,3 +41,7 @@ mocks: .bin/mockery
 .bin/mockery: $(wildcard vendor/github.com/vektra/mockery/*/*.go) redis.go
 	@echo "building mock generator..."
 	@cd vendor/github.com/vektra/mockery/v2 && go build -o $(shell git rev-parse --show-toplevel)/.bin/mockery .
+
+.bin/gotestsum: $(wildcard vendor/gotest.tools/*/*.go)
+	@echo "building test runner..."
+	@cd vendor/gotest.tools/gotestsum && go build -o $(shell git rev-parse --show-toplevel)/.bin/gotestsum .
